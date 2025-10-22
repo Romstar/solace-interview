@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1761140783222,
+      "tag": "0000_strong_veda",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761140956720,
+      "tag": "0001_strong_mister_sinister",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761141775601,
+      "tag": "0002_swift_the_call",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761142252543,
+      "tag": "0003_fast_inhumans",
+      "breakpoints": true
+    }
+  ]
+}
