@@ -8,7 +8,15 @@ import {
   bigint,
   index,
   primaryKey,
+  customType,
 } from "drizzle-orm/pg-core";
+
+// Define the custom type for tsvector
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return 'tsvector';
+  },
+});
 
 const advocates = pgTable("advocates", {
   id: serial("id").primaryKey(),
@@ -20,23 +28,23 @@ const advocates = pgTable("advocates", {
   phoneNumber: bigint("phone_number", { mode: "number" }).notNull(),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   // Full-text search vectors
-  firstNameVector: text("first_name_vector").generatedAlwaysAs(sql`to_tsvector('english', first_name)`),
-  lastNameVector: text("last_name_vector").generatedAlwaysAs(sql`to_tsvector('english', last_name)`),
-  cityVector: text("city_vector").generatedAlwaysAs(sql`to_tsvector('english', city)`),
+  firstNameVector: tsvector("first_name_vector").notNull(),//.generatedAlwaysAs(sql`to_tsvector('english', first_name)`),
+  lastNameVector: tsvector("last_name_vector").notNull(),//.generatedAlwaysAs(sql`to_tsvector('english', last_name)`),
+  cityVector: tsvector("city_vector").notNull(),//.generatedAlwaysAs(sql`to_tsvector('english', city)`),
 }, (table) => ({
-  firstNameVectorIdx: index("advocates_first_name_vector_idx").on(table.firstNameVector),
-  lastNameVectorIdx: index("advocates_last_name_vector_idx").on(table.lastNameVector),
-  cityVectorIdx: index("advocates_city_vector_idx").on(table.cityVector),
+  firstNameVectorIdx: index("advocates_first_name_vector_idx").using("gin", sql`to_tsvector('english', ${table.firstName})`),
+  lastNameVectorIdx: index("advocates_last_name_vector_idx").using("gin", sql`to_tsvector('english', ${table.lastName})`),
+  cityVectorIdx: index("advocates_city_vector_idx").using("gin", sql`to_tsvector('english', ${table.city})`),
 }));
 
 const specialties = pgTable("specialties", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   description: text("description"),
-  searchVector: text("search_vector").generatedAlwaysAs(sql`to_tsvector('english', name || ' ' || COALESCE(description, ''))`),
+  searchVector: tsvector("search_vector").notNull(),//.generatedAlwaysAs(sql`to_tsvector('english', name || ' ' || COALESCE(description, ''))`),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
 }, (table) => ({
-  searchVectorIdx: index("specialties_search_vector_idx").on(table.searchVector),
+  searchVectorIdx: index("specialties_search_vector_idx").using("gin", sql`to_tsvector('english', ${table.name} || ' ' || COALESCE(${table.description}, ''))`),
 }));
 
 const advocateSpecialties = pgTable("advocate_specialties", {

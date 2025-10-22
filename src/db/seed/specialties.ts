@@ -42,6 +42,7 @@ const seedSpecialties = async () => {
       const result = await db.insert(specialties).values({
         name: specialtyName,
         description: null,
+        searchVector: sql`to_tsvector('english', ${specialtyName})`,
       }).onConflictDoNothing().returning();
       
       if (result.length > 0) {
