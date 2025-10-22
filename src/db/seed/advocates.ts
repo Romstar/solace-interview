@@ -1,6 +1,7 @@
 import db from "..";
 import { advocates } from "../schema";
 import { specialtiesData } from "./specialties";
+import { sql } from "drizzle-orm";
 
 const generateRandomFirstName = () => {
   const firstNames = [
@@ -95,13 +96,20 @@ export const generateRandomAdvocates = (count: number = 1000000) => {
   const advocates = [];
   
   for (let i = 0; i < count; i++) {
+    const firstName = generateRandomFirstName();
+    const lastName = generateRandomLastName();
+    const city = cities[Math.floor(Math.random() * cities.length)];
+    
     advocates.push({
-      firstName: generateRandomFirstName(),
-      lastName: generateRandomLastName(),
-      city: cities[Math.floor(Math.random() * cities.length)],
+      firstName,
+      lastName,
+      city,
       degree: degrees[Math.floor(Math.random() * degrees.length)],
       yearsOfExperience: Math.floor(Math.random() * 20) + 1, // 1-20 years
       phoneNumber: generateRandomPhoneNumber(),
+      firstNameVector: sql`to_tsvector('english', ${firstName})`,
+      lastNameVector: sql`to_tsvector('english', ${lastName})`,
+      cityVector: sql`to_tsvector('english', ${city})`,
     });
   }
   
