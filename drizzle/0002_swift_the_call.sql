@@ -1,0 +1,1 @@
+ALTER TABLE "advocates" DROP COLUMN IF EXISTS "payload";

@@ -1,21 +1,26 @@
-import db from "../../../db";
-import { advocates } from "../../../db/schema";
-import { generateRandomAdvocates } from "../../../db/seed/advocates";
+import seedAdvocates from "../../../db/seed/advocates";
+import seedSpecialties from "../../../db/seed/specialties";
+import seedAdvocateSpecialties from "../../../db/seed/advocateSpecialties";
 
 export async function POST() {
   try {
+    console.log("Starting database seeding...");
     
-    for (let i = 0; i < 10; i++) {
-      const advocateData = generateRandomAdvocates(5000);
-      
-      const result = await db.insert(advocates).values(advocateData).onConflictDoNothing(); 
-    }
+    // Seed specialties first (they might be referenced by advocates)
+    await seedSpecialties();
     
-    return Response.json({ message: "Advocates seeded successfully" });
+    // Then seed advocates
+    await seedAdvocates();
+    
+    // Finally, create the advocate-specialty relationships
+    await seedAdvocateSpecialties();
+    
+    console.log("Database seeding completed successfully!");
+    return Response.json({ message: "Database seeded successfully" });
   } catch (error) {
-    console.error("Error seeding advocates:", error);
+    console.error("Error seeding database:", error);
     return Response.json(
-      { error: "Failed to seed advocates", details: error instanceof Error ? error.message : "Unknown error" },
+      { error: "Failed to seed database", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
